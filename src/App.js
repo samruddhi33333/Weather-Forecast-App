@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import WeatherCard from './WeatherCard';
 import './App.css';
 
-const RAPIDAPI_KEY = 'a46a1fa02emshee4f366ff573b25p1eae05jsnecd9dee14da2'; 
-const RAPIDAPI_HOST = 'weatherapi-com.p.rapidapi.com';
+const RAPIDAPI_KEY = process.env.REACT_APP_RAPIDAPI_KEY;
+const RAPIDAPI_HOST = process.env.REACT_APP_RAPIDAPI_HOST;
 
 // Get weekday name
 const getWeekday = (dateString) => {
