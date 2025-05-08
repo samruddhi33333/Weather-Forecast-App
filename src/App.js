@@ -4,6 +4,12 @@ import './App.css';
 
 const API_KEY = 'affb30227de443bbbfd25246250805';
 
+// Function to get the weekday name
+const getWeekday = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { weekday: 'long' });
+};
+
 const App = () => {
   const [location, setLocation] = useState('Pune');
   const [query, setQuery] = useState('Pune');
@@ -18,6 +24,7 @@ const App = () => {
           `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${query}&days=5&aqi=no&alerts=no`
         );
         const forecast = await forecastRes.json();
+        console.log('Forecast Data:', forecast); // Debugging
         setForecastData(forecast.forecast.forecastday);
 
         // Get 5 previous dates
@@ -32,7 +39,10 @@ const App = () => {
         const historyPromises = pastDates.map(date =>
           fetch(`https://api.weatherapi.com/v1/history.json?key=${API_KEY}&q=${query}&dt=${date}`)
             .then(res => res.json())
-            .then(data => data.forecast.forecastday[0])
+            .then(data => {
+              console.log('Historical Data:', data); // Debugging
+              return data.forecast.forecastday[0];
+            })
         );
 
         const history = await Promise.all(historyPromises);
@@ -66,14 +76,14 @@ const App = () => {
       <h2>Past 5 Days</h2>
       <div className="weather-forecast">
         {historyData.map((day, index) => (
-          <WeatherCard key={`history-${index}`} weather={day} />
+          <WeatherCard key={`history-${index}`} weather={{ ...day, weekday: getWeekday(day.date) }} />
         ))}
       </div>
 
       <h2>Upcoming 5 Days</h2>
       <div className="weather-forecast">
         {forecastData.map((day, index) => (
-          <WeatherCard key={`forecast-${index}`} weather={day} />
+          <WeatherCard key={`forecast-${index}`} weather={{ ...day, weekday: getWeekday(day.date) }} />
         ))}
       </div>
     </div>
