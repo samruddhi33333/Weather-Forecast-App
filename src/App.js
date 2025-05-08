@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import WeatherCard from './WeatherCard';
 import './App.css';
 
-const API_KEY = 'affb30227de443bbbfd25246250805';
+const RAPIDAPI_KEY = 'a46a1fa02emshee4f366ff573b25p1eae05jsnecd9dee14da2'; 
+const RAPIDAPI_HOST = 'weatherapi-com.p.rapidapi.com';
 
-// Function to get the weekday name
+// Get weekday name
 const getWeekday = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', { weekday: 'long' });
@@ -18,16 +19,24 @@ const App = () => {
 
   useEffect(() => {
     const fetchWeather = async () => {
+      const options = {
+        method: 'GET',
+        headers: {
+          'X-RapidAPI-Key': RAPIDAPI_KEY,
+          'X-RapidAPI-Host': RAPIDAPI_HOST
+        }
+      };
+
       try {
-        // Fetch forecast data (next 5 days)
+        // Forecast data (next 5 days)
         const forecastRes = await fetch(
-          `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${query}&days=5&aqi=no&alerts=no`
+          `https://${RAPIDAPI_HOST}/forecast.json?q=${query}&days=5`,
+          options
         );
         const forecast = await forecastRes.json();
-        console.log('Forecast Data:', forecast); // Debugging
         setForecastData(forecast.forecast.forecastday);
 
-        // Get 5 previous dates
+        // Previous 5 days
         const today = new Date();
         const pastDates = [...Array(5)].map((_, i) => {
           const d = new Date(today);
@@ -35,20 +44,19 @@ const App = () => {
           return d.toISOString().split('T')[0];
         });
 
-        // Fetch historical data
         const historyPromises = pastDates.map(date =>
-          fetch(`https://api.weatherapi.com/v1/history.json?key=${API_KEY}&q=${query}&dt=${date}`)
+          fetch(
+            `https://${RAPIDAPI_HOST}/history.json?q=${query}&dt=${date}`,
+            options
+          )
             .then(res => res.json())
-            .then(data => {
-              console.log('Historical Data:', data); // Debugging
-              return data.forecast.forecastday[0];
-            })
+            .then(data => data.forecast.forecastday[0])
         );
 
         const history = await Promise.all(historyPromises);
         setHistoryData(history.reverse()); // Show oldest first
       } catch (err) {
-        console.error('Weather API error:', err);
+        console.error('Weather API (via RapidAPI) error:', err);
       }
     };
 
